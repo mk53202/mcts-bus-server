@@ -28,7 +28,7 @@ def get_routes():
     response = requests.request("GET", url_request, headers=headers, params=querystring)
     dict_response = xmltodict.parse(response.text)
 
-    json_response = json.dumps(dict_response['bustime-response'],
+    json_response = json.dumps(dict_response['bustime-response'].['stop'],
     							sort_keys=True,indent=4, separators=(',', ': '))
     return json_response
 
