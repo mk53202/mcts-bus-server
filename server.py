@@ -1,19 +1,40 @@
+import os
 import json
-import sensor_temperature
+import requests
+import xmltodict
 from flask import Flask
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def get_temp():
-    my_datetime = sensor_temperature.get_datetime()
-    my_temperature = sensor_temperature.get_temperature()
+@app.route('/getstops')
+def get_routes():
 
-    return json.dumps(
-        {
-        'temperature':str(my_temperature),
-        'timestamp':str(my_datetime)
-        }
-    )
+    url_site = "http://realtime.ridemcts.com"
+    url_api = "/bustime/api/v1/getstops"
+    url_request = url_site + url_api
+    bus_routes = 'GRE'
+    bus_direction = 'NORTH'
+    querystring = {
+    	"key": os.environ['BUSTIME_API_KEY'],
+    	"rt": bus_routes,
+    	"dir": bus_direction
+    }
+    headers = {
+    	'cache-control': "no-cache"
+    }
+
+    response = requests.request("GET", url_request, headers=headers, params=querystring)
+    dict_response = xmltodict.parse(response.text)
+
+    json_response = json.dumps(dict_response['bustime-response'],
+    							sort_keys=True,indent=4, separators=(',', ': '))
+    return json_response
+
+    # return json.dumps(
+    #     {
+    #     'temperature':str(my_temperature),
+    #     'timestamp':str(my_datetime)
+    #     }
+    # )
